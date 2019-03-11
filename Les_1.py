@@ -49,12 +49,9 @@ def login():
     if form.validate_on_submit():
         f = request.form['username']
         f1 = request.form['password']
-        print(hashlib.md5(f1.encode('utf-8')).hexdigest())
-        print(User.query.all())
+
         for i in User.query.all():
-            print(i.email == f)
-            print(hashlib.md5(f1.encode('utf-8')).hexdigest() == i.password)
-            print(i.password)
+
             if i.email == f and (hashlib.md5(f1.encode('utf-8')).hexdigest() == i.password):
                 return redirect('/success')
 
