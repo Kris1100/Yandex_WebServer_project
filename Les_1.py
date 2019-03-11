@@ -43,6 +43,45 @@ db.session.commit()
 
 
 @app.route('/')
+@app.route('/form_sample', methods=['POST', 'GET'])
+def form_sample():
+    if request.method == 'GET':
+        return '''<!doctype html>
+                        <html lang="en">
+                          <head>
+                            <meta charset="utf-8">
+                            <meta name="viewport"
+                            content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                            <link rel="stylesheet"
+                            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+                            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+                            crossorigin="anonymous">
+                            <title>Пример формы</title>
+                          </head>
+                          <body>
+                            <h1>Форма для регистрации в суперсекретной системе</h1>
+                            <form method="post">
+                                <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите адрес почты" name="email">
+                                <input type="password" class="form-control" id="password" placeholder="Введите пароль" name="password">
+                                <input type="password" class="form-control" id="password again" placeholder="Введите пароль еще раз" name="password again">
+                                
+                                <div class="form-group form-check">
+                                    <input type="checkbox" class="form-check-input" id="acceptRules" name="accept">
+                                    <label class="form-check-label" for="acceptRules">Готов быть добровольцем</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Записаться</button>
+                            </form>
+                          </body>
+                        </html>'''
+    elif request.method == 'POST':
+        print(request.form['email'])
+        print(request.form['password'])
+        print(request.form['password again'])
+        print(request.form['accept'])
+        print(request.form['sex'])
+        return "Форма отправлена"
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
