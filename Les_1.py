@@ -43,7 +43,7 @@ db.session.commit()
 
 
 @app.route('/')
-@app.route('/form_sample', methods=['POST', 'GET'])
+@app.route('/check_in', methods=['POST', 'GET'])
 def form_sample():
     if request.method == 'GET':
         return '''<!doctype html>
@@ -74,12 +74,20 @@ def form_sample():
                           </body>
                         </html>'''
     elif request.method == 'POST':
-        print(request.form['email'])
-        print(request.form['password'])
-        print(request.form['password again'])
-        print(request.form['accept'])
-        print(request.form['sex'])
-        return "Форма отправлена"
+
+        if request.form['password'] == request.form['password again'] and (request.form['accept'] == 'on') and request.form['email']:
+            for i in User.query.all():
+                if i.email == request.form['email']:
+                    return redirect('/login')
+            user = User(username=request.form['email'].split('@')[0],
+                         email=request.form['email'],
+                         password=hashlib.md5(request.form['password'].encode('utf-8')).hexdigest())
+
+            db.session.add(user)
+            db.session.commit()
+
+            return redirect('/success')
+
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -103,4 +111,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(port=8080, host='127.0.0.1')
+    app.run(port=8081, host='127.0.0.1')
