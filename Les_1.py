@@ -27,7 +27,7 @@ class User(db.Model):
             self.id, self.username)
 
 
-# db.create_all()
+db.create_all()
 
 user1 = User(username='student1',
              email='student1@yandexlyceum.ru',
@@ -43,7 +43,7 @@ db.session.commit()
 
 
 @app.route('/')
-@app.route('/form_sample', methods=['POST', 'GET'])
+@app.route('/check_in', methods=['POST', 'GET'])
 def form_sample():
     if request.method == 'GET':
         return '''<!doctype html>
@@ -61,25 +61,40 @@ def form_sample():
                           <body>
                             <h1>Форма для регистрации в суперсекретной системе</h1>
                             <form method="post">
+                            <div class="form-group">
+                                    <label for="about">Login</label>
+                                    <textarea class="form-control" id="about" rows="1" name="about"></textarea>
+                                </div>
                                 <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите адрес почты" name="email">
                                 <input type="password" class="form-control" id="password" placeholder="Введите пароль" name="password">
                                 <input type="password" class="form-control" id="password again" placeholder="Введите пароль еще раз" name="password again">
-                                
+
                                 <div class="form-group form-check">
                                     <input type="checkbox" class="form-check-input" id="acceptRules" name="accept">
-                                    <label class="form-check-label" for="acceptRules">Готов быть добровольцем</label>
+                                    <label class="form-check-label" for="acceptRules">Согласие</label>
                                 </div>
+                                <head>
+            <a href="login">Авторизация</a>
+        </head>
                                 <button type="submit" class="btn btn-primary">Записаться</button>
                             </form>
                           </body>
                         </html>'''
     elif request.method == 'POST':
-        print(request.form['email'])
-        print(request.form['password'])
-        print(request.form['password again'])
-        print(request.form['accept'])
-        print(request.form['sex'])
-        return "Форма отправлена"
+
+        if request.form['password'] == request.form['password again'] and (request.form['accept'] == 'on') and \
+                request.form['email']:
+            for i in User.query.all():
+                if i.email == request.form['email']:
+                    return redirect('/login')
+            user = User(username=request.form['about'],
+                        email=request.form['email'],
+                        password=hashlib.md5(request.form['password'].encode('utf-8')).hexdigest())
+
+            db.session.add(user)
+            db.session.commit()
+
+            return redirect('/success')
 
 
 @app.route('/login', methods=['GET', 'POST'])
