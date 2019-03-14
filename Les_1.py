@@ -23,63 +23,38 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
 
     def __repr__(self):
-        return '<YandexLyceumStudent {} {}>'.format(
+        return '<User {} {}>'.format(
             self.id, self.username)
 
 
 db.create_all()
-
-user1 = User(username='student1',
-             email='student1@yandexlyceum.ru',
-             password=hashlib.md5('qwerty'.encode('utf-8')).hexdigest())
-
-user2 = User(username='student2',
-             email='student2@yandexlyceum.ru',
-             password=hashlib.md5('password01'.encode('utf-8')).hexdigest())
-
-# db.session.add(user1)
-# db.session.add(user2)
 db.session.commit()
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///t.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db1 = SQLAlchemy(app)
+
+
+class Text(db1.Model):
+    id = db1.Column(db1.Integer, primary_key=True)
+    user = db1.Column(db1.Integer, unique=False, nullable=False)
+    text = db1.Column(db1.String(1024), unique=False, nullable=False)
+
+    def __repr__(self):
+        return '<Text {}>'.format(self.id)
+
+
+db1.create_all()
+db1.session.commit()
 
 
 @app.route('/')
 @app.route('/check_in', methods=['POST', 'GET'])
 def form_sample():
-    if request.method == 'GET':
-        return '''<!doctype html>
-                        <html lang="en">
-                          <head>
-                            <meta charset="utf-8">
-                            <meta name="viewport"
-                            content="width=device-width, initial-scale=1, shrink-to-fit=no">
-                            <link rel="stylesheet"
-                            href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-                            integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
-                            crossorigin="anonymous">
-                            <title>Пример формы</title>
-                          </head>
-                          <body>
-                            <h1>Форма для регистрации в суперсекретной системе</h1>
-                            <form method="post">
-                            <div class="form-group">
-                                    <label for="about">Login</label>
-                                    <textarea class="form-control" id="about" rows="1" name="about"></textarea>
-                                </div>
-                                <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Введите адрес почты" name="email">
-                                <input type="password" class="form-control" id="password" placeholder="Введите пароль" name="password">
-                                <input type="password" class="form-control" id="password again" placeholder="Введите пароль еще раз" name="password again">
+    form = LoginForm()
 
-                                <div class="form-group form-check">
-                                    <input type="checkbox" class="form-check-input" id="acceptRules" name="accept">
-                                    <label class="form-check-label" for="acceptRules">Согласие</label>
-                                </div>
-                                <head>
-            <a href="login">Авторизация</a>
-        </head>
-                                <button type="submit" class="btn btn-primary">Записаться</button>
-                            </form>
-                          </body>
-                        </html>'''
+    if request.method == 'GET':
+        return render_template('check_in.html', title='Регистрация', form=form)
     elif request.method == 'POST':
 
         if request.form['password'] == request.form['password again'] and (request.form['accept'] == 'on') and \
@@ -95,6 +70,7 @@ def form_sample():
             db.session.commit()
 
             return redirect('/success')
+    return render_template('check_in.html', title='Профиль', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -114,7 +90,21 @@ def login():
 
 @app.route('/success')
 def index():
-    return "Привет, Яндекс! Я - Кристина"
+    form = LoginForm()
+    if request.method == 'GET':
+        return render_template('Profile.html', title='Профиль', form=form)
+    elif request.method == 'POST':
+
+        if request.form['password'] == request.form['password again'] and (request.form['accept'] == 'on') and \
+                request.form['email']:
+            for i in User.query.all():
+                if i.email == request.form['email']:
+                    return redirect('/login')
+
+            db.session.commit()
+
+            return redirect('/success')
+    return render_template('Profile.html', title='Профиль', form=form)
 
 
 if __name__ == '__main__':
