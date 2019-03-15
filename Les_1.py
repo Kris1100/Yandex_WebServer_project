@@ -27,25 +27,24 @@ class User(db.Model):
             self.id, self.username)
 
 
-db.create_all()
-db.session.commit()
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///t.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db1 = SQLAlchemy(app)
-
-
-class Text(db1.Model):
-    id = db1.Column(db1.Integer, primary_key=True)
-    user = db1.Column(db1.Integer, unique=False, nullable=False)
-    text = db1.Column(db1.String(1024), unique=False, nullable=False)
+class Text(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user = db.Column(db.Integer, unique=False, nullable=False)
+    text = db.Column(db.String(1024), unique=False, nullable=False)
 
     def __repr__(self):
         return '<Text {}>'.format(self.id)
 
 
-db1.create_all()
-db1.session.commit()
+db.create_all()
+
+user2 = User(username='student2',
+             email='student2@yandexlyceum.ru',
+             password=hash('password01'))
+
+# db.session.add(user2)
+
+db.session.commit()
 
 
 @app.route('/')
@@ -93,17 +92,7 @@ def index():
     form = LoginForm()
     if request.method == 'GET':
         return render_template('Profile.html', title='Профиль', form=form)
-    elif request.method == 'POST':
 
-        if request.form['password'] == request.form['password again'] and (request.form['accept'] == 'on') and \
-                request.form['email']:
-            for i in User.query.all():
-                if i.email == request.form['email']:
-                    return redirect('/login')
-
-            db.session.commit()
-
-            return redirect('/success')
     return render_template('Profile.html', title='Профиль', form=form)
 
 
