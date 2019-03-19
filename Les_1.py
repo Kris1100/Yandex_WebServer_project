@@ -19,6 +19,7 @@ db = SQLAlchemy(app)
 id_of_user = -2
 f = ''
 f1 = ''
+session = {}
 
 
 class User(db.Model):
@@ -63,62 +64,64 @@ def form_sample():
 
         if request.form['password'] == request.form['password again'] and (request.form['accept'] == 'on') and \
                 request.form['email']:
-            for i in User.query.all():
-                if i.email == request.form['email']:
-                    return redirect('/login')
+            if User.query.filter_by(email=request.form['email'], password=f1).first():
+                return redirect('/login')
             user = User(username=request.form['about'],
                         email=request.form['email'],
                         password=hashlib.md5(request.form['password'].encode('utf-8')).hexdigest())
 
             db.session.add(user)
             db.session.commit()
-            return redirect('/success')
+            return redirect('/login')
     return render_template('check_in.html', title='Профиль', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global f
-    global f1
-    global id_of_user
+    global session
 
     form = LoginForm()
+
+    user_name = form.username.data
+
     if form.validate_on_submit():
         f = request.form['username']
         f1 = request.form['password']
         f1 = hashlib.md5(f1.encode('utf-8')).hexdigest()
-        for i in User.query.all():
-            if i.email == f and (f1 == i.password):
-                id_of_user = i.id
-                print(id_of_user)
-
-                return redirect('/success')
+        if User.query.filter_by(email=f, password=f1).first():
+            session['username'] = user_name
+            session['user_id'] = User.query.filter_by(email=f, password=f1).first().id
+            return redirect('/success')
 
     return render_template('login.html', title='Авторизация', form=form)
 
 
 @app.route('/success')
 def success():
+    if 'username' not in session:
+        return redirect('/login')
     form = LoginForm()
     if request.method == 'GET':
         return render_template('Profile.html', title='Профиль', form=form)
 
     elif request.method == 'POST':
-        print(1)
+        pass
 
     return render_template('Profile.html', title='Профиль', form=form)
 
 
 @app.route('/add_news')
 def add_news():
-    global id_of_user
-    form = AddNewsForm()
+    global session
+    if 'username' not in session:
+        return redirect('/login')
 
+    form = AddNewsForm()
     if request.method == 'GET':
         return render_template('add_news.html', title='Добавить цель', form=form)
 
     elif request.method == 'POST':
-        new = Text(user=id_of_user,
+        new = Text(user=session['user_id'],
                    text=request.form['content'])
 
         db.session.add(new)
@@ -128,11 +131,11 @@ def add_news():
     return render_template('add_news.html', title='Добавить цель', form=form)
 
 
-# @app.route('/logout')
-# def logout():
-#     session.pop('username', 0)
-#     session.pop('user_id', 0)
-#     return redirect('/login')
+@app.route('/logout')
+def logout():
+    session.pop('username', 0)
+    session.pop('user_id', 0)
+    return redirect('/login')
 
 
 if __name__ == '__main__':
