@@ -39,7 +39,7 @@ class Text(db.Model):
     text = db.Column(db.String(3000), unique=False, nullable=False)
 
     def __repr__(self):
-        return '<Text {}>'.format(self.id)
+        return '<Text {} {}>'.format(self.id, self.text)
 
 
 db.create_all()
@@ -110,7 +110,7 @@ def success():
     return render_template('Profile.html', title='Профиль', form=form)
 
 
-@app.route('/add_news')
+@app.route('/add_news', methods=['GET', 'POST'])
 def add_news():
     global session
     if 'username' not in session:
@@ -126,6 +126,7 @@ def add_news():
 
         db.session.add(new)
         db.session.commit()
+        print(Text.query.all())
         return redirect('/success')
 
     return render_template('add_news.html', title='Добавить цель', form=form)
