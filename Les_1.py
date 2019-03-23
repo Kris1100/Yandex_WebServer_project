@@ -1,3 +1,4 @@
+
 import hashlib
 
 from flask import Flask
@@ -147,8 +148,9 @@ def all_of():
 def delete_news(news_id):
     if 'username' not in session:
         return redirect('/login')
-    nm = Text.query.filter_by(user=session['user_id'], id=news_id)
-    db.session.delete(nm)
+    news = Text.query.filter_by(user=session['user_id'])
+
+    db.session.delete(news[news_id])
     db.session.commit()
     return redirect("/success")
 
