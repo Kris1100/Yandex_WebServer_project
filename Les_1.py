@@ -140,8 +140,6 @@ def all_of():
     if 'username' not in session:
         return redirect('/login')
     news = Text.query.filter_by(user=session['user_id'])
-    for i in news:
-        print(i)
     return render_template('all_of.html', title='Добавить цель', form=form, news=news)
 
 
