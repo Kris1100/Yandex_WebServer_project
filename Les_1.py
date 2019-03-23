@@ -140,8 +140,6 @@ def all_of():
     if 'username' not in session:
         return redirect('/login')
     news = Text.query.filter_by(user=session['user_id'])
-    for i in news:
-        print(i)
     return render_template('all_of.html', title='Добавить цель', form=form, news=news)
 
 
@@ -149,9 +147,9 @@ def all_of():
 def delete_news(news_id):
     if 'username' not in session:
         return redirect('/login')
-    nm = Text.query.filter_by(user=session['user_id'])
-    print(nm[news_id])
-    nm.delete(news_id)
+    nm = Text.query.filter_by(user=session['user_id'], id=news_id)
+    db.session.delete(nm)
+    db.session.commit()
     return redirect("/success")
 
 
