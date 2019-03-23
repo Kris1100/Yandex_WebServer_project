@@ -148,9 +148,7 @@ def all_of():
 def delete_news(news_id):
     if 'username' not in session:
         return redirect('/login')
-    news = Text.query.filter_by(user=session['user_id'])
-
-    db.session.delete(news[news_id])
+    db.session.delete(Text.query.filter_by(id=news_id).first())
     db.session.commit()
     return redirect("/success")
 
