@@ -126,10 +126,22 @@ def add_news():
 
         db.session.add(new)
         db.session.commit()
-        print(Text.query.all())
         return redirect('/success')
 
     return render_template('add_news.html', title='Добавить цель', form=form)
+
+
+@app.route('/all_of', methods=['GET', 'POST'])
+def all_of():
+    global session
+
+    form = AddNewsForm()
+
+    if 'username' not in session:
+        return redirect('/login')
+    news = Text.query.filter_by(user=session['username'])
+    return render_template('all_of.html', title='Добавить цель', form=form)
+
 
 
 @app.route('/logout')
