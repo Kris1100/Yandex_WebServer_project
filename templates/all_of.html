@@ -19,10 +19,12 @@
 
 <a href="/add_news">Добавить цель</a>
 {% for item in news %}
-    <div class="alert alert-dark" role="alert">
-            <div>{{item['text']}}</div>
-        <a href="/delete_news/{{item['id']}}">Удалить цель</a>
-    </div>
+<div class="alert alert-dark" role="alert">
+    <div>{{item['text']}}</div>
+    <a href="/delete_news/{{item['id']}}">Цель выполнена</a>
+    <a href="/edit_news/{{item['id']}}">Редактировать цель</a>
+    <a href="/delete_news/{{item['id']}}">Удалить цель</a>
+</div>
 {% endfor %}
 </body>
 </html>

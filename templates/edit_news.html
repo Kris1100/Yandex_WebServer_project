@@ -1,10 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Профиль</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            <form class="form-inline my-2 my-lg-0">
+                <a href="logout">Выход</a>
+            </form>
+        </div>
+    </div>
+</nav>
+    <h1>Добавление новости</h1>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <p>
+            <div class="alert alert-dark" role="alert">
+    <div>{{item['text']}}</div>
+    <input type="text" name="content" class="form-control" id="validationTooltip01" placeholder="Имя" value={{item['text']}} required>
+</div>
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}
+
+
+
+
