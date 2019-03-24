@@ -1,4 +1,3 @@
-
 import hashlib
 
 from flask import Flask
@@ -141,7 +140,7 @@ def all_of():
     if 'username' not in session:
         return redirect('/login')
     news = Text.query.filter_by(user=session['user_id'])
-    return render_template('all_of.html', title='Добавить цель', form=form, news=news)
+    return render_template('all_of.html', title='Все цели', form=form, news=news)
 
 
 @app.route('/delete_news/<int:news_id>', methods=['GET'])
@@ -150,7 +149,30 @@ def delete_news(news_id):
         return redirect('/login')
     db.session.delete(Text.query.filter_by(id=news_id).first())
     db.session.commit()
-    return redirect("/success")
+    return redirect("/all_of")
+
+
+@app.route('/edit_news/<int:news_id>', methods=['GET', 'POST'])
+def edit_news(news_id):
+    global session
+    if 'username' not in session:
+        return redirect('/login')
+
+    form = AddNewsForm()
+
+    item = Text.query.filter_by(id=news_id).first()
+    if request.method == 'GET':
+        return render_template('edit_news.html', title='Добавить цель', form=form, item=item)
+
+    elif request.method == 'POST':
+        db.session.delete(Text.query.filter_by(id=news_id).first())
+        new = Text(user=session['user_id'],
+                   text=request.form['content'])
+        db.session.add(new)
+        db.session.commit()
+        return redirect('/success')
+
+    return render_template('edit_news.html', title='Добавить цель', form=form, item=item)
 
 
 @app.route('/logout')
