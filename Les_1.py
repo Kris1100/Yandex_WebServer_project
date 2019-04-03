@@ -4,6 +4,7 @@ from flask import Flask
 from flask import redirect
 from flask import render_template
 from flask import request
+from user import UsForm
 from flask_sqlalchemy import SQLAlchemy
 
 from add_news import AddNewsForm
@@ -25,8 +26,11 @@ session = {}
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     password = db.Column(db.String(120), unique=False, nullable=False)
+    ph = db.Column(db.String(120), unique=False, nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+
+
 
     def __repr__(self):
         return '<User {} {}>'.format(
@@ -43,12 +47,6 @@ class Text(db.Model):
 
 
 db.create_all()
-
-user2 = User(username='student2',
-             email='student2@yandexlyceum.ru',
-             password=hashlib.md5('password01'.encode('utf-8')).hexdigest())
-
-# db.session.add(user2)
 
 db.session.commit()
 
@@ -68,7 +66,9 @@ def form_sample():
                 return redirect('/login')
             user = User(username=request.form['about'],
                         email=request.form['email'],
-                        password=hashlib.md5(request.form['password'].encode('utf-8')).hexdigest())
+                        password=hashlib.md5(request.form['password'].encode('utf-8')).hexdigest(),
+                        ph='/static/img/qwe.jpg')
+
 
             db.session.add(user)
             db.session.commit()
@@ -90,6 +90,7 @@ def login():
         f1 = hashlib.md5(f1.encode('utf-8')).hexdigest()
         if User.query.filter_by(email=f, password=f1).first():
             session['username'] = user_name
+            session['login'] = User.query.filter_by(email=f, password=f1).first().username
             session['user_id'] = User.query.filter_by(email=f, password=f1).first().id
             return redirect('/success')
 
@@ -162,23 +163,50 @@ def edit_news(news_id):
 
     item = Text.query.filter_by(id=news_id).first()
     if request.method == 'GET':
-        return render_template('edit_news.html', title='Добавить цель', form=form, item=item)
+        return render_template('edit_news.html', title='Изменить цель', form=form, item=item)
 
     elif request.method == 'POST':
+
         db.session.delete(Text.query.filter_by(id=news_id).first())
         new = Text(user=session['user_id'],
                    text=request.form['content'])
+
         db.session.add(new)
         db.session.commit()
         return redirect('/success')
 
-    return render_template('edit_news.html', title='Добавить цель', form=form, item=item)
+    return render_template('edit_news.html', title='Изменить цель', form=form, item=item)
+
+
+@app.route('/user', methods=['GET', 'POST'])
+def user():
+    global session
+    if 'username' not in session:
+        return redirect('/login')
+
+    form = UsForm()
+    item = User.query.filter_by(id=session['user_id']).first()
+
+    if request.method == 'GET':
+        return render_template('user.html', title='Профиль', form=form, item=item)
+
+
+    elif request.method == 'POST':
+        print(form.file)
+        f = form.file.data
+        print(f)
+        User.query.filter_by(id=session['user_id']).first().ph = str(f)
+        print(User.query.filter_by(id=session['user_id']).first().ph)
+        return render_template('user.html', title='Профиль', form=form, item=item)
+
+    return render_template('user.html', title='Профиль', form=form, item=item)
 
 
 @app.route('/logout')
 def logout():
     session.pop('username', 0)
     session.pop('user_id', 0)
+    session.pop('login', 0)
     return redirect('/login')
 
 
