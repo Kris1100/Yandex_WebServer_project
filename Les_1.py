@@ -1,14 +1,15 @@
 import hashlib
+import os
 
 from flask import Flask
 from flask import redirect
 from flask import render_template
 from flask import request
-from user import UsForm
 from flask_sqlalchemy import SQLAlchemy
 
 from add_news import AddNewsForm
 from loginform import LoginForm
+from user import UsForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
@@ -29,8 +30,6 @@ class User(db.Model):
     ph = db.Column(db.String(120), unique=False, nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-
-
 
     def __repr__(self):
         return '<User {} {}>'.format(
@@ -68,7 +67,6 @@ def form_sample():
                         email=request.form['email'],
                         password=hashlib.md5(request.form['password'].encode('utf-8')).hexdigest(),
                         ph='/static/img/qwe.jpg')
-
 
             db.session.add(user)
             db.session.commit()
@@ -192,11 +190,13 @@ def user():
 
 
     elif request.method == 'POST':
-        print(form.file)
-        f = form.file.data
-        print(f)
-        User.query.filter_by(id=session['user_id']).first().ph = str(f)
-        print(User.query.filter_by(id=session['user_id']).first().ph)
+        im = form.photo.data
+        if im:
+            photo_path = os.path.join('static/img', im.filename)
+            im.save(photo_path)
+
+            User.query.filter_by(id=session['user_id']).first().ph = os.path.join('img', im.filename)
+
         return render_template('user.html', title='Профиль', form=form, item=item)
 
     return render_template('user.html', title='Профиль', form=form, item=item)
