@@ -183,19 +183,15 @@ def user():
         return redirect('/login')
 
     form = UsForm()
-    item = User.query.filter_by(id=session['user_id']).first()
+    item = User.query.get(session['user_id'])
 
-    if request.method == 'GET':
-        return render_template('user.html', title='Профиль', form=form, item=item)
-
-
-    elif request.method == 'POST':
+    if form.validate_on_submit():
         im = form.photo.data
         if im:
             photo_path = os.path.join('static/img', im.filename)
             im.save(photo_path)
-
-            User.query.filter_by(id=session['user_id']).first().ph = os.path.join('img', im.filename)
+            item.ph = os.path.join('static/img', im.filename)
+            db.session.commit()
 
         return render_template('user.html', title='Профиль', form=form, item=item)
 
